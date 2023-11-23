@@ -3,14 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <title>Home</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        margin: 0;
+      }
+    </style>
   </head>
   <body>
+    <canvas id="canvas" style="z-index: -1; position: absolute"></canvas>
     <h1>Multi window broadcast channel demo</h1>
     <div id="sessions">
       <h2>Sessions</h2>
       <ul id="sessionList"></ul>
     </div>
     <script>
+      const canvas = document.getElementById("canvas");
+      let centerX = 0;
+      let centerY = 0;
+      const resizeCanvas = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "lightblue";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        centerX = canvas.width / 2;
+        centerY = canvas.height / 2;
+        const radius = 10;
+        ctx.fillStyle = "red";
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fill();
+      };
+
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+
       const sessionList = document.getElementById("sessionList");
       const createSessionLi = (sessionId) => {
         const li = document.createElement("li");
@@ -22,9 +53,21 @@
           ": ",
           document.createElement("span"),
           ",",
-          document.createElement("span")
+          document.createElement("span"),
+          ",",
+          document.createElement("span"),
+          ",",
+          document.createElement("span"),
+          
         );
         return li;
+      };
+      const updateSessionElement = (li, { screenLeft, screenTop, centerX, centerY }) => {
+        const [, l, t, cx, cy] = li.children;
+        l.textContent = screenLeft;
+        t.textContent = screenTop;
+        cx.textContent = centerX;
+        cy.textContent = centerY;
       };
 
       const insertOrdered = (li) => {
@@ -37,12 +80,6 @@
         sessionList.append(li);
       };
 
-      const updateSessionElement = (li, { screenLeft, screenTop }) => {
-        const [, l, t] = li.children;
-        l.textContent = screenLeft;
-        t.textContent = screenTop;
-      };
-
       const sessionId = Math.random().toString(36).substr(2, 5);
 
       const myli = createSessionLi(sessionId);
@@ -52,9 +89,10 @@
       const channel = new BroadcastChannel("position-channel");
 
       const positionElem = () => {
-        updateSessionElement(myli, window);
         const { screenLeft, screenTop } = window;
-        channel.postMessage({ sessionId, screenLeft, screenTop});
+        const o = { sessionId, screenLeft, screenTop, centerX, centerY }
+        updateSessionElement(myli, o);
+        channel.postMessage(o);
         window.requestAnimationFrame(positionElem);
       };
 
