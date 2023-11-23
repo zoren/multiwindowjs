@@ -22,14 +22,17 @@
       const canvas = document.getElementById("canvas");
       let centerX = 0;
       let centerY = 0;
-      const ctx = canvas.getContext("2d");
+      const radius = 10;
+
+      const ctx = canvas.getContext("2d", { alpha: false });
+
       const drawCenter = (x, y) => {
-        const radius = 10;
         ctx.fillStyle = "red";
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, 2 * Math.PI);
         ctx.fill();
       };
+
       const drawBackground = () => {
         ctx.fillStyle = "lightblue";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -73,25 +76,25 @@
       sessionList.append(myli);
 
       const channel = new BroadcastChannel("position-channel");
-      const lineCtx = canvas.getContext("2d");
-      lineCtx.strokeStyle = "black";
 
       const drawLines = () => {
         drawBackground();
+        ctx.strokeStyle = "black";
+
         const sessions = [...sessionMap.values()];
         for (const o of sessions) {
           for (const p of sessions) {
             if (o === p) continue;
-            lineCtx.beginPath();
-            lineCtx.moveTo(
+            ctx.beginPath();
+            ctx.moveTo(
               o.centerScreenX - screenLeft,
               o.centerScreenY - screenTop
             );
-            lineCtx.lineTo(
+            ctx.lineTo(
               p.centerScreenX - screenLeft,
               p.centerScreenY - screenTop
             );
-            lineCtx.stroke();
+            ctx.stroke();
           }
         }
         for (const o of sessions) {
