@@ -50,7 +50,10 @@
         );
         return li;
       };
-      const updateSessionElement = (li, { screenLeft, screenTop, innerWidth, innerHeight }) => {
+      const updateSessionElement = (
+        li,
+        { screenLeft, screenTop, innerWidth, innerHeight }
+      ) => {
         const [, l, t] = li.children;
         l.textContent = JSON.stringify([screenLeft, screenTop]);
         t.textContent = JSON.stringify([innerWidth, innerHeight]);
@@ -109,9 +112,16 @@
         }
       };
 
+      // Get the DPR and size of the canvas
+      const dpr = window.devicePixelRatio;
       const resizeWindow = () => {
-        canvas.width = innerWidth;
-        canvas.height = innerHeight;
+        // Set the "actual" size of the canvas
+        canvas.width = innerWidth * dpr;
+        canvas.height = innerHeight * dpr;
+
+        // Set the "drawn" size of the canvas
+        canvas.style.width = `${innerWidth}px`;
+        canvas.style.height = `${innerHeight}px`;
 
         sessionObj.innerWidth = innerWidth;
         sessionObj.innerHeight = innerHeight;
@@ -124,8 +134,14 @@
       window.addEventListener("resize", resizeWindow);
       resizeWindow();
 
+      // Scale the context to ensure correct drawing operations
+      ctx.scale(dpr, dpr);
+
       const positionElem = () => {
-        if (sessionObj.screenLeft === screenLeft && sessionObj.screenTop === screenTop) {
+        if (
+          sessionObj.screenLeft === screenLeft &&
+          sessionObj.screenTop === screenTop
+        ) {
           window.requestAnimationFrame(positionElem);
           return;
         }
