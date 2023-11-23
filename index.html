@@ -91,22 +91,25 @@
 
       const drawLines = () => {
         drawBackground();
-        ctx.strokeStyle = "white";
 
         const sessions = [...sessionMap.values()];
+        ctx.beginPath();
         for (let i = 0; i < sessions.length; i++) {
+          const ci = calcCenter(sessions[i]);
           for (let j = i + 1; j < sessions.length; j++) {
-            ctx.beginPath();
-            ctx.moveTo(...calcCenter(sessions[i]));
+            ctx.moveTo(...ci);
             ctx.lineTo(...calcCenter(sessions[j]));
-            ctx.stroke();
           }
         }
+        ctx.closePath();
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+
         for (const o of sessions) {
           if (o === sessionObj) {
             ctx.fillStyle = "green";
             ctx.beginPath();
-            ctx.arc(innerWidth / 2, innerHeight/2, 15, 0, 2 * Math.PI);
+            ctx.arc(innerWidth / 2, innerHeight / 2, 15, 0, 2 * Math.PI);
             ctx.fill();
           } else drawCenter(...calcCenter(o));
         }
