@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Home</title>
+  </head>
+  <body>
+    <h1>Multi window broadcast channel demo</h1>
+    <p id="pElem"></p>
+    <p id="iam"></p>
+    <p id="received"></p>
+    <div id="sessions">
+      <h2>Sessions</h2>
+      <ul id="sessionList"></ul>
+    </div>
+    <script>
+      const sessions = new Map();
+      const updateSession = ({ sessionId, screenLeft, screenTop }) => {
+        const li = document.getElementById(sessionId);
+        li.textContent =
+          "id:" +
+          sessionId +
+          "screenLeft: " +
+          screenLeft +
+          ", screenTop: " +
+          screenTop;
+      };
+      const sessionList = document.getElementById("sessionList");
+      const findBeforeSession = (id) => {
+        for (const child of sessionList.children) {
+          if (child.id > id) {
+            return child;
+          }
+        }
+        return null;
+      };
+      const addSession = (params) => {
+        let li;
+        const { sessionId, screenLeft, screenTop } = params;
+        if (!sessions.has(sessionId)) {
+          console.log("adding", params);
+          li = document.createElement("li");
+          li.id = sessionId;
+          const before = findBeforeSession(sessionId);
+          if (before) {
+            sessionList.insertBefore(li, before);
+          } else {
+            sessionList.append(li);
+          }
+        } else {
+          li = document.getElementById(sessionId);
+        }
+        updateSession(params);
+        sessions.set(sessionId, { screenLeft, screenTop });
+        return li;
+      };
+
+      const sessionId = Math.random().toString(36).substr(2, 5);
+
+      const sessionObj = { sessionId };
+
+      const myli = addSession(sessionObj);
+      iam.textContent = "I am " + sessionId;
+      const channel = new BroadcastChannel("example-channel");
+
+      const positionElem = () => {
+        const { screenLeft, screenTop } = window;
+        sessionObj.screenLeft = screenLeft;
+        sessionObj.screenTop = screenTop;
+        updateSession(sessionObj);
+        const txt = "screenLeft: " + screenLeft + ", screenTop: " + screenTop;
+        pElem.textContent = txt;
+        channel.postMessage(sessionObj);
+        window.requestAnimationFrame(positionElem);
+      };
+
+      window.requestAnimationFrame(positionElem);
+
+      window.addEventListener("beforeunload", () => {
+        channel.postMessage({ sessionId, message: "leaving" });
+        channel.close();
+      });
+
+      channel.addEventListener("message", ({ data }) => {
+        const { sessionId } = data;
+        if (data.message === "leaving") {
+          sessions.delete(sessionId);
+          const element = document.getElementById(sessionId);
+          console.log("leaving", { sessionId, element });
+
+          element.remove();
+        } else {
+          addSession(data);
+        }
+      });
+    </script>
+  </body>
+</html>
