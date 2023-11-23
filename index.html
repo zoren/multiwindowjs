@@ -25,13 +25,14 @@
           screenTop;
       };
       const sessionList = document.getElementById("sessionList");
-      const findBeforeSession = (id) => {
+      const insertOrdered = (li) => {
         for (const child of sessionList.children) {
-          if (child.id > id) {
-            return child;
+          if (li.id < child.id) {
+            sessionList.insertBefore(li, child);
+            return;
           }
         }
-        return null;
+        sessionList.append(li);
       };
       const addSession = (params) => {
         const { sessionId, screenLeft, screenTop } = params;
@@ -39,12 +40,7 @@
         if (!li) {
           li = document.createElement("li");
           li.id = sessionId;
-          const before = findBeforeSession(sessionId);
-          if (before) {
-            sessionList.insertBefore(li, before);
-          } else {
-            sessionList.append(li);
-          }
+          insertOrdered(li);
         }
         updateSession(params);
         return li;
@@ -79,7 +75,6 @@
       channel.addEventListener("message", ({ data }) => {
         const { sessionId } = data;
         if (data.message === "leaving") {
-          sessions.delete(sessionId);
           document.getElementById(sessionId).remove();
         } else {
           addSession(data);
