@@ -77,6 +77,16 @@
 
       const channel = new BroadcastChannel("position-channel");
 
+      const calcCenter = ({
+        innerWidth,
+        innerHeight,
+        screenLeft,
+        screenTop,
+      }) => [
+        screenLeft + innerWidth / 2 - window.screenLeft,
+        screenTop + innerHeight / 2 - window.screenTop,
+      ];
+
       const drawLines = () => {
         drawBackground();
         ctx.strokeStyle = "black";
@@ -86,19 +96,13 @@
           for (const p of sessions) {
             if (o === p) continue;
             ctx.beginPath();
-            ctx.moveTo(
-              o.centerScreenX - screenLeft,
-              o.centerScreenY - screenTop
-            );
-            ctx.lineTo(
-              p.centerScreenX - screenLeft,
-              p.centerScreenY - screenTop
-            );
+            ctx.moveTo(...calcCenter(o));
+            ctx.lineTo(...calcCenter(p));
             ctx.stroke();
           }
         }
         for (const o of sessions) {
-          drawCenter(o.centerScreenX - screenLeft, o.centerScreenY - screenTop);
+          drawCenter(...calcCenter(o));
         }
         ctx.fillStyle = "green";
         ctx.beginPath();
@@ -123,15 +127,12 @@
       };
       sessionMap.set(sessionId, o);
       const positionElem = () => {
-        const { screenLeft, screenTop } = window;
         drawLines();
-        const centerScreenX = screenLeft + centerX;
-        const centerScreenY = screenTop + centerY;
 
         o.screenLeft = screenLeft;
         o.screenTop = screenTop;
-        o.centerScreenX = centerScreenX;
-        o.centerScreenY = centerScreenY;
+        o.innerWidth = innerWidth;
+        o.innerHeight = innerHeight;
 
         updateSessionElement(myli, o);
         channel.postMessage(o);
