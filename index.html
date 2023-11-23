@@ -6,64 +6,55 @@
   </head>
   <body>
     <h1>Multi window broadcast channel demo</h1>
-    <p id="iam"></p>
     <div id="sessions">
       <h2>Sessions</h2>
       <ul id="sessionList"></ul>
     </div>
     <script>
-      const updateSession = ({ sessionId, screenLeft, screenTop }) => {
-        const li = document.getElementById(sessionId);
+      const sessionList = document.getElementById("sessionList");
+      const createSessionLi = (sessionId) => {
+        const li = document.createElement("li");
+        li.id = sessionId;
+        const idSpan = document.createElement("span");
+        idSpan.textContent = sessionId;
+        li.append(
+          idSpan,
+          ": ",
+          document.createElement("span"),
+          ",",
+          document.createElement("span")
+        );
+        return li;
+      };
+
+      const insertOrdered = (li) => {
+        for (const child of sessionList.children) {
+          if (li.id < child.id) {
+            sessionList.insertBefore(li, child);
+            return;
+          }
+        }
+        sessionList.append(li);
+      };
+
+      const updateSessionElement = (li, { screenLeft, screenTop }) => {
         const [, l, t] = li.children;
         l.textContent = screenLeft;
         t.textContent = screenTop;
       };
-      const sessionList = document.getElementById("sessionList");
-      const addSession = (params) => {
-        const { sessionId, screenLeft, screenTop } = params;
-        let li = document.getElementById(sessionId);
-        if (!li) {
-          li = document.createElement("li");
-          li.id = sessionId;
-          const idSpan = document.createElement("span");
-          idSpan.textContent = sessionId;
-          li.append(
-            idSpan,
-            ": ",
-            document.createElement("span"),
-            ",",
-            document.createElement("span")
-          );
-          const insertOrdered = () => {
-            for (const child of sessionList.children) {
-              if (li.id < child.id) {
-                sessionList.insertBefore(li, child);
-                return;
-              }
-            }
-            sessionList.append(li);
-          };
-          insertOrdered();
-        }
-        updateSession(params);
-        return li;
-      };
 
       const sessionId = Math.random().toString(36).substr(2, 5);
 
-      const sessionObj = { sessionId };
-
-      const myli = addSession(sessionObj);
+      const myli = createSessionLi(sessionId);
       myli.style.backgroundColor = "lightgreen";
-      iam.textContent = "I am " + sessionId;
-      const channel = new BroadcastChannel("example-channel");
+      sessionList.append(myli);
+
+      const channel = new BroadcastChannel("position-channel");
 
       const positionElem = () => {
+        updateSessionElement(myli, window);
         const { screenLeft, screenTop } = window;
-        sessionObj.screenLeft = screenLeft;
-        sessionObj.screenTop = screenTop;
-        updateSession(sessionObj);
-        channel.postMessage(sessionObj);
+        channel.postMessage({ sessionId, screenLeft, screenTop});
         window.requestAnimationFrame(positionElem);
       };
 
@@ -76,10 +67,15 @@
 
       channel.addEventListener("message", ({ data }) => {
         const { sessionId } = data;
+        let sessionElement = document.getElementById(sessionId);
         if (data.message === "leaving") {
-          document.getElementById(sessionId).remove();
+          if (sessionElement) sessionElement.remove();
         } else {
-          addSession(data);
+          if (!sessionElement) {
+            sessionElement = createSessionLi(sessionId);
+            insertOrdered(sessionElement);
+          }
+          updateSessionElement(sessionElement, data);
         }
       });
     </script>
