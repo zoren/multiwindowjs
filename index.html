@@ -148,10 +148,10 @@
           window.requestAnimationFrame(positionElem);
           return;
         }
-        drawLines();
-
         sessionObj.screenLeft = screenLeft;
         sessionObj.screenTop = screenTop;
+
+        drawLines();
 
         updateSessionElement(myli, sessionObj);
         channel.postMessage(sessionObj);
