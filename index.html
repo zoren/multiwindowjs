@@ -22,21 +22,25 @@
       const canvas = document.getElementById("canvas");
       let centerX = 0;
       let centerY = 0;
-      const resizeCanvas = () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "lightblue";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        centerX = canvas.width / 2;
-        centerY = canvas.height / 2;
+      const ctx = canvas.getContext("2d");
+      const drawCenter = () => {
         const radius = 10;
         ctx.fillStyle = "red";
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
         ctx.fill();
+      };
+      const drawBackground = () => {
+        ctx.fillStyle = "lightblue";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      };
+      const resizeCanvas = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        centerX = canvas.width / 2;
+        centerY = canvas.height / 2;
+
+        drawBackground();
       };
 
       window.addEventListener("resize", resizeCanvas);
@@ -53,23 +57,14 @@
           ": ",
           document.createElement("span"),
           ",",
-          document.createElement("span"),
-          ",",
-          document.createElement("span"),
-          ",",
           document.createElement("span")
         );
         return li;
       };
-      const updateSessionElement = (
-        li,
-        { screenLeft, screenTop, centerX, centerY }
-      ) => {
-        const [, l, t, cx, cy] = li.children;
+      const updateSessionElement = (li, { screenLeft, screenTop }) => {
+        const [, l, t] = li.children;
         l.textContent = screenLeft;
         t.textContent = screenTop;
-        cx.textContent = centerX;
-        cy.textContent = centerY;
       };
       const otherSessionMap = new Map();
       window.otherSessionMap = otherSessionMap;
@@ -93,11 +88,10 @@
       const lineCtx = canvas.getContext("2d");
       lineCtx.strokeStyle = "black";
 
-      const positionElem = () => {
-        const { screenLeft, screenTop } = window;
+      const drawLines = () => {
+        drawBackground();
 
         for (const other of otherSessionMap.values()) {
-          // console.log(other);
           const {
             screenLeft: otherLeft,
             screenTop: otherTop,
@@ -108,14 +102,17 @@
           lineCtx.lineTo(centerScreenX - screenLeft, centerScreenY - screenTop);
           lineCtx.stroke();
         }
+        drawCenter();
+      };
+      const positionElem = () => {
+        const { screenLeft, screenTop } = window;
+        drawLines();
         const centerScreenX = screenLeft + centerX;
         const centerScreenY = screenTop + centerY;
         const o = {
           sessionId,
           screenLeft,
           screenTop,
-          centerX,
-          centerY,
           centerScreenX,
           centerScreenY,
         };
@@ -138,9 +135,10 @@
           otherSessionMap.delete(sessionId);
           if (sessionElement) sessionElement.remove();
         } else {
+          otherSessionMap.set(sessionId, data);
+          drawLines();
           if (!sessionElement) {
             sessionElement = createSessionLi(sessionId);
-            otherSessionMap.set(sessionId, data);
             insertOrdered(sessionElement);
           }
           updateSessionElement(sessionElement, data);
