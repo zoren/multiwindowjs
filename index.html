@@ -50,10 +50,10 @@
         );
         return li;
       };
-      const updateSessionElement = (li, { screenLeft, screenTop }) => {
+      const updateSessionElement = (li, { screenLeft, screenTop, innerWidth, innerHeight }) => {
         const [, l, t] = li.children;
-        l.textContent = screenLeft;
-        t.textContent = screenTop;
+        l.textContent = JSON.stringify([screenLeft, screenTop]);
+        t.textContent = JSON.stringify([innerWidth, innerHeight]);
       };
       const insertOrdered = (li) => {
         for (const child of sessionList.children) {
@@ -111,9 +111,14 @@
       };
 
       const resizeWindow = () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
 
+        sessionObj.innerWidth = innerWidth;
+        sessionObj.innerHeight = innerHeight;
+        channel.postMessage(sessionObj);
+
+        updateSessionElement(myli, sessionObj);
         drawLines();
       };
 
@@ -121,12 +126,14 @@
       resizeWindow();
 
       const positionElem = () => {
+        if (sessionObj.screenLeft === screenLeft && sessionObj.screenTop === screenTop) {
+          window.requestAnimationFrame(positionElem);
+          return;
+        }
         drawLines();
 
         sessionObj.screenLeft = screenLeft;
         sessionObj.screenTop = screenTop;
-        sessionObj.innerWidth = innerWidth;
-        sessionObj.innerHeight = innerHeight;
 
         updateSessionElement(myli, sessionObj);
         channel.postMessage(sessionObj);
@@ -147,7 +154,13 @@
           sessionMap.delete(sessionId);
           if (sessionElement) sessionElement.remove();
         } else {
-          sessionMap.set(sessionId, data);
+          const sess = sessionMap.get(sessionId);
+          if (sess) Object.assign(sess, data);
+          else {
+            // when a new session is created, we broadcast our data
+            channel.postMessage(sessionObj);
+            sessionMap.set(sessionId, data);
+          }
           drawLines();
           if (!sessionElement) {
             sessionElement = createSessionLi(sessionId);
