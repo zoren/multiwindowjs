@@ -128,6 +128,8 @@
 
         sessionObj.innerWidth = innerWidth;
         sessionObj.innerHeight = innerHeight;
+        // Scale the context to ensure correct drawing operations
+        ctx.scale(dpr, dpr);
         channel.postMessage(sessionObj);
 
         updateSessionElement(myli, sessionObj);
@@ -136,9 +138,6 @@
 
       window.addEventListener("resize", resizeWindow);
       resizeWindow();
-
-      // Scale the context to ensure correct drawing operations
-      ctx.scale(dpr, dpr);
 
       const positionElem = () => {
         if (
