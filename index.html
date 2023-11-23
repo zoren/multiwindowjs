@@ -34,7 +34,7 @@
       };
 
       const drawBackground = () => {
-        ctx.fillStyle = "lightblue";
+        ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       };
 
@@ -100,9 +100,13 @@
         for (const o of sessions) {
           drawCenter(o.centerScreenX - screenLeft, o.centerScreenY - screenTop);
         }
+        ctx.fillStyle = "green";
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 15, 0, 2 * Math.PI);
+        ctx.fill();
       };
 
-      const resizeCanvas = () => {
+      const resizeWindow = () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         centerX = canvas.width / 2;
@@ -111,8 +115,8 @@
         drawLines();
       };
 
-      window.addEventListener("resize", resizeCanvas);
-      resizeCanvas();
+      window.addEventListener("resize", resizeWindow);
+      resizeWindow();
 
       const o = {
         sessionId,
