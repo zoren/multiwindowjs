@@ -66,8 +66,7 @@
         l.textContent = screenLeft;
         t.textContent = screenTop;
       };
-      const otherSessionMap = new Map();
-      window.otherSessionMap = otherSessionMap;
+      const sessionMap = new Map();
       const insertOrdered = (li) => {
         for (const child of sessionList.children) {
           if (li.id < child.id) {
@@ -90,32 +89,39 @@
 
       const drawLines = () => {
         drawBackground();
-
-        for (const other of otherSessionMap.values()) {
-          const {
-            screenLeft: otherLeft,
-            screenTop: otherTop,
-            centerScreenX,
-            centerScreenY,
-          } = other;
-          lineCtx.moveTo(centerX, centerY);
-          lineCtx.lineTo(centerScreenX - screenLeft, centerScreenY - screenTop);
-          lineCtx.stroke();
+        const sessions = [...sessionMap.values()];
+        for (const o of sessions) {
+          for (const p of sessions) {
+            if (o === p) continue;
+            lineCtx.beginPath();
+            lineCtx.moveTo(
+              o.centerScreenX - screenLeft,
+              o.centerScreenY - screenTop
+            );
+            lineCtx.lineTo(
+              p.centerScreenX - screenLeft,
+              p.centerScreenY - screenTop
+            );
+            lineCtx.stroke();
+          }
         }
         drawCenter();
       };
+      const o = {
+        sessionId,
+      };
+      sessionMap.set(sessionId, o);
       const positionElem = () => {
         const { screenLeft, screenTop } = window;
         drawLines();
         const centerScreenX = screenLeft + centerX;
         const centerScreenY = screenTop + centerY;
-        const o = {
-          sessionId,
-          screenLeft,
-          screenTop,
-          centerScreenX,
-          centerScreenY,
-        };
+
+        o.screenLeft = screenLeft;
+        o.screenTop = screenTop;
+        o.centerScreenX = centerScreenX;
+        o.centerScreenY = centerScreenY;
+
         updateSessionElement(myli, o);
         channel.postMessage(o);
         window.requestAnimationFrame(positionElem);
@@ -132,10 +138,10 @@
         const { sessionId } = data;
         let sessionElement = document.getElementById(sessionId);
         if (data.message === "leaving") {
-          otherSessionMap.delete(sessionId);
+          sessionMap.delete(sessionId);
           if (sessionElement) sessionElement.remove();
         } else {
-          otherSessionMap.set(sessionId, data);
+          sessionMap.set(sessionId, data);
           drawLines();
           if (!sessionElement) {
             sessionElement = createSessionLi(sessionId);
