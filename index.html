@@ -91,12 +91,11 @@
         ctx.strokeStyle = "black";
 
         const sessions = [...sessionMap.values()];
-        for (const o of sessions) {
-          for (const p of sessions) {
-            if (o === p) continue;
+        for (let i = 0; i < sessions.length; i++) {
+          for (let j = i + 1; j < sessions.length; j++) {
             ctx.beginPath();
-            ctx.moveTo(...calcCenter(o));
-            ctx.lineTo(...calcCenter(p));
+            ctx.moveTo(...calcCenter(sessions[i]));
+            ctx.lineTo(...calcCenter(sessions[j]));
             ctx.stroke();
           }
         }
