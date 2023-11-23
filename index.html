@@ -38,7 +38,6 @@
         let li;
         const { sessionId, screenLeft, screenTop } = params;
         if (!sessions.has(sessionId)) {
-          console.log("adding", params);
           li = document.createElement("li");
           li.id = sessionId;
           const before = findBeforeSession(sessionId);
@@ -85,10 +84,7 @@
         const { sessionId } = data;
         if (data.message === "leaving") {
           sessions.delete(sessionId);
-          const element = document.getElementById(sessionId);
-          console.log("leaving", { sessionId, element });
-
-          element.remove();
+          document.getElementById(sessionId).remove();
         } else {
           addSession(data);
         }
