@@ -23,28 +23,17 @@
       let centerX = 0;
       let centerY = 0;
       const ctx = canvas.getContext("2d");
-      const drawCenter = () => {
+      const drawCenter = (x, y) => {
         const radius = 10;
         ctx.fillStyle = "red";
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.arc(x, y, radius, 0, 2 * Math.PI);
         ctx.fill();
       };
       const drawBackground = () => {
         ctx.fillStyle = "lightblue";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       };
-      const resizeCanvas = () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        centerX = canvas.width / 2;
-        centerY = canvas.height / 2;
-
-        drawBackground();
-      };
-
-      window.addEventListener("resize", resizeCanvas);
-      resizeCanvas();
 
       const sessionList = document.getElementById("sessionList");
       const createSessionLi = (sessionId) => {
@@ -105,8 +94,23 @@
             lineCtx.stroke();
           }
         }
-        drawCenter();
+        for (const o of sessions) {
+          drawCenter(o.centerScreenX - screenLeft, o.centerScreenY - screenTop);
+        }
       };
+
+      const resizeCanvas = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        centerX = canvas.width / 2;
+        centerY = canvas.height / 2;
+
+        drawLines();
+      };
+
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+
       const o = {
         sessionId,
       };
