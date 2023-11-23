@@ -20,16 +20,13 @@
     </div>
     <script>
       const canvas = document.getElementById("canvas");
-      let centerX = 0;
-      let centerY = 0;
-      const radius = 10;
 
       const ctx = canvas.getContext("2d", { alpha: false });
 
       const drawCenter = (x, y) => {
         ctx.fillStyle = "red";
         ctx.beginPath();
-        ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.arc(x, y, 10, 0, 2 * Math.PI);
         ctx.fill();
       };
 
@@ -58,7 +55,6 @@
         l.textContent = screenLeft;
         t.textContent = screenTop;
       };
-      const sessionMap = new Map();
       const insertOrdered = (li) => {
         for (const child of sessionList.children) {
           if (li.id < child.id) {
@@ -70,6 +66,9 @@
       };
 
       const sessionId = Math.random().toString(36).substr(2, 5);
+
+      const sessionObj = { sessionId };
+      const sessionMap = new Map([[sessionId, sessionObj]]);
 
       const myli = createSessionLi(sessionId);
       myli.style.backgroundColor = "lightgreen";
@@ -102,19 +101,18 @@
           }
         }
         for (const o of sessions) {
-          drawCenter(...calcCenter(o));
+          if (o === sessionObj) {
+            ctx.fillStyle = "green";
+            ctx.beginPath();
+            ctx.arc(...calcCenter(o), 15, 0, 2 * Math.PI);
+            ctx.fill();
+          } else drawCenter(...calcCenter(o));
         }
-        ctx.fillStyle = "green";
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, 15, 0, 2 * Math.PI);
-        ctx.fill();
       };
 
       const resizeWindow = () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        centerX = canvas.width / 2;
-        centerY = canvas.height / 2;
 
         drawLines();
       };
@@ -122,20 +120,16 @@
       window.addEventListener("resize", resizeWindow);
       resizeWindow();
 
-      const o = {
-        sessionId,
-      };
-      sessionMap.set(sessionId, o);
       const positionElem = () => {
         drawLines();
 
-        o.screenLeft = screenLeft;
-        o.screenTop = screenTop;
-        o.innerWidth = innerWidth;
-        o.innerHeight = innerHeight;
+        sessionObj.screenLeft = screenLeft;
+        sessionObj.screenTop = screenTop;
+        sessionObj.innerWidth = innerWidth;
+        sessionObj.innerHeight = innerHeight;
 
-        updateSessionElement(myli, o);
-        channel.postMessage(o);
+        updateSessionElement(myli, sessionObj);
+        channel.postMessage(sessionObj);
         window.requestAnimationFrame(positionElem);
       };
 
