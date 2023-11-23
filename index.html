@@ -115,6 +115,11 @@
         }
       };
 
+      const postPosition = () =>
+        setTimeout(() => {
+          channel.postMessage(sessionObj);
+        });
+
       // Get the DPR and size of the canvas
       const dpr = window.devicePixelRatio;
       const resizeWindow = () => {
@@ -130,10 +135,10 @@
         sessionObj.innerHeight = innerHeight;
         // Scale the context to ensure correct drawing operations
         ctx.scale(dpr, dpr);
-        channel.postMessage(sessionObj);
 
         updateSessionElement(myli, sessionObj);
         drawLines();
+        postPosition();
       };
 
       window.addEventListener("resize", resizeWindow);
@@ -153,7 +158,7 @@
         drawLines();
 
         updateSessionElement(myli, sessionObj);
-        channel.postMessage(sessionObj);
+        postPosition();
         window.requestAnimationFrame(positionElem);
       };
 
@@ -175,7 +180,7 @@
           if (sess) Object.assign(sess, data);
           else {
             // when a new session is created, we broadcast our data
-            channel.postMessage(sessionObj);
+            postPosition();
             sessionMap.set(sessionId, data);
           }
           drawLines();
