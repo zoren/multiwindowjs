@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Home</title>
     <style>
       html,
       body {
@@ -62,6 +61,7 @@
       };
 
       const sessionId = Math.random().toString(36).substr(2, 5);
+      document.title = sessionId;
 
       const sessionObj = { sessionId };
       const sessionMap = new Map([[sessionId, sessionObj]]);
