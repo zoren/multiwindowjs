@@ -24,13 +24,6 @@
 
       const ctx = canvas.getContext("2d", { alpha: false });
 
-      const drawCenter = (x, y) => {
-        ctx.fillStyle = "red";
-        ctx.beginPath();
-        ctx.arc(x, y, 10, 0, 2 * Math.PI);
-        ctx.fill();
-      };
-
       const drawBackground = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       };
@@ -105,8 +98,11 @@
         ctx.strokeStyle = "white";
         ctx.stroke();
 
-        for (const o of centers) {
-          drawCenter(...o);
+        for (const [x, y] of centers) {
+          ctx.fillStyle = "red";
+          ctx.beginPath();
+          ctx.arc(x, y, 10, 0, 2 * Math.PI);
+          ctx.fill();
         }
       };
 
