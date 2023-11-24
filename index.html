@@ -22,120 +22,120 @@
     </div>
     <script>
       // https://mdn.github.io/dom-examples/screenleft-screentop/
-      const canvas = document.getElementById("canvas");
+      const canvas = document.getElementById('canvas')
 
-      const ctx = canvas.getContext("2d", { alpha: false });
+      const ctx = canvas.getContext('2d', { alpha: false })
 
-      const sessionId = Math.random().toString(36).substr(2, 5);
-      document.title = sessionId;
+      const sessionId = Math.random().toString(36).substr(2, 5)
+      document.title = sessionId
 
-      const sessionObj = { sessionId };
-      const sessionMap = new Map([[sessionId, sessionObj]]);
+      const sessionObj = { sessionId }
+      const sessionMap = new Map([[sessionId, sessionObj]])
 
-      const channel = new BroadcastChannel("position-channel");
+      const channel = new BroadcastChannel('position-channel')
 
       const drawLines = () => {
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.scale(dpr, dpr);
+        ctx.setTransform(1, 0, 0, 1, 0, 0)
+        ctx.scale(dpr, dpr)
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.translate(-window.screenLeft, -window.screenTop);
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.translate(-window.screenLeft, -window.screenTop)
 
         const calcCenter = ({
           innerWidth,
           innerHeight,
           screenLeft,
           screenTop,
-        }) => [screenLeft + innerWidth / 2, screenTop + innerHeight / 2];
+        }) => [screenLeft + innerWidth / 2, screenTop + innerHeight / 2]
 
-        const centers = [...sessionMap.values()].map(calcCenter);
-        ctx.beginPath();
+        const centers = [...sessionMap.values()].map(calcCenter)
+        ctx.beginPath()
         for (let i = 0; i < centers.length; i++) {
-          const ci = centers[i];
+          const ci = centers[i]
           for (let j = i + 1; j < centers.length; j++) {
-            ctx.moveTo(...ci);
-            ctx.lineTo(...centers[j]);
+            ctx.moveTo(...ci)
+            ctx.lineTo(...centers[j])
           }
         }
-        ctx.closePath();
-        ctx.strokeStyle = "white";
-        ctx.stroke();
+        ctx.closePath()
+        ctx.strokeStyle = 'white'
+        ctx.stroke()
 
         for (const [x, y] of centers) {
-          ctx.fillStyle = "red";
-          ctx.beginPath();
-          ctx.arc(x, y, 10, 0, 2 * Math.PI);
-          ctx.fill();
+          ctx.fillStyle = 'red'
+          ctx.beginPath()
+          ctx.arc(x, y, 10, 0, 2 * Math.PI)
+          ctx.fill()
         }
-      };
+      }
 
       const postPosition = () =>
-        setTimeout(() => channel.postMessage(sessionObj));
+        setTimeout(() => channel.postMessage(sessionObj))
 
       // Get the DPR and size of the canvas
-      const dpr = window.devicePixelRatio;
+      const dpr = window.devicePixelRatio
       const resizeWindow = () => {
         // Set the "actual" size of the canvas
-        canvas.width = innerWidth * dpr;
-        canvas.height = innerHeight * dpr;
+        canvas.width = innerWidth * dpr
+        canvas.height = innerHeight * dpr
 
         // Set the "drawn" size of the canvas
-        canvas.style.width = `${innerWidth}px`;
-        canvas.style.height = `${innerHeight}px`;
+        canvas.style.width = `${innerWidth}px`
+        canvas.style.height = `${innerHeight}px`
 
-        sessionObj.innerWidth = innerWidth;
-        sessionObj.innerHeight = innerHeight;
+        sessionObj.innerWidth = innerWidth
+        sessionObj.innerHeight = innerHeight
         // Scale the context to ensure correct drawing operations
-        ctx.scale(dpr, dpr);
+        ctx.scale(dpr, dpr)
 
-        drawLines();
-        postPosition();
-      };
+        drawLines()
+        postPosition()
+      }
 
-      window.addEventListener("resize", resizeWindow);
-      resizeWindow();
+      window.addEventListener('resize', resizeWindow)
+      resizeWindow()
 
       const positionElem = () => {
         if (
           sessionObj.screenLeft === screenLeft &&
           sessionObj.screenTop === screenTop
         ) {
-          window.requestAnimationFrame(positionElem);
-          return;
+          window.requestAnimationFrame(positionElem)
+          return
         }
-        sessionObj.screenLeft = screenLeft;
-        sessionObj.screenTop = screenTop;
+        sessionObj.screenLeft = screenLeft
+        sessionObj.screenTop = screenTop
 
-        drawLines();
+        drawLines()
 
-        postPosition();
-        window.requestAnimationFrame(positionElem);
-      };
+        postPosition()
+        window.requestAnimationFrame(positionElem)
+      }
 
-      window.requestAnimationFrame(positionElem);
+      window.requestAnimationFrame(positionElem)
 
-      window.addEventListener("beforeunload", () => {
-        channel.postMessage({ sessionId, message: "leaving" });
-        channel.close();
-      });
+      window.addEventListener('beforeunload', () => {
+        channel.postMessage({ sessionId, message: 'leaving' })
+        channel.close()
+      })
 
-      channel.addEventListener("message", ({ data }) => {
-        const { sessionId } = data;
-        if (data.message === "leaving") {
-          sessionMap.delete(sessionId);
-          explainer.hidden = sessionMap.size > 1;
+      channel.addEventListener('message', ({ data }) => {
+        const { sessionId } = data
+        if (data.message === 'leaving') {
+          sessionMap.delete(sessionId)
+          explainer.hidden = sessionMap.size > 1
         } else {
-          const sess = sessionMap.get(sessionId);
-          if (sess) Object.assign(sess, data);
+          const sess = sessionMap.get(sessionId)
+          if (sess) Object.assign(sess, data)
           else {
             // when a new session is created, we broadcast our data
-            postPosition();
-            sessionMap.set(sessionId, data);
-            explainer.hidden = sessionMap.size > 1;
+            postPosition()
+            sessionMap.set(sessionId, data)
+            explainer.hidden = sessionMap.size > 1
           }
-          drawLines();
+          drawLines()
         }
-      });
+      })
     </script>
   </body>
 </html>
