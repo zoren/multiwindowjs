@@ -32,8 +32,6 @@
       const sessionObj = { sessionId }
       const sessionMap = new Map([[sessionId, sessionObj]])
 
-      const channel = new BroadcastChannel('position-channel')
-
       const drawLines = () => {
         ctx.setTransform(1, 0, 0, 1, 0, 0)
         ctx.scale(dpr, dpr)
@@ -42,14 +40,7 @@
         ctx.fillRect(0, 0, canvas.width, canvas.height)
         ctx.translate(-window.screenLeft, -window.screenTop)
 
-        const calcCenter = ({
-          innerWidth,
-          innerHeight,
-          screenLeft,
-          screenTop,
-        }) => [screenLeft + innerWidth / 2, screenTop + innerHeight / 2]
-
-        const centers = [...sessionMap.values()].map(calcCenter)
+        const centers = [...sessionMap.values()].map(({ center }) => center)
         ctx.beginPath()
         for (let i = 0; i < centers.length; i++) {
           const ci = centers[i]
@@ -57,7 +48,7 @@
             ctx.moveTo(...ci)
             ctx.lineTo(...centers[j])
           }
-        }        
+        }
         ctx.strokeStyle = 'white'
         ctx.stroke()
 
@@ -69,8 +60,15 @@
         }
       }
 
+      const channel = new BroadcastChannel('position-channel')
+
       const postPosition = () =>
         setTimeout(() => channel.postMessage(sessionObj))
+
+      const calcCenter = () => [
+        (screenLeft + (innerWidth >> 1)) | 0,
+        (screenTop + (innerHeight >> 1)) | 0,
+      ]
 
       const resizeWindow = () => {
         canvas.width = innerWidth * dpr
@@ -81,6 +79,7 @@
 
         sessionObj.innerWidth = innerWidth
         sessionObj.innerHeight = innerHeight
+        sessionObj.center = calcCenter()
 
         drawLines()
         postPosition()
@@ -99,9 +98,9 @@
         }
         sessionObj.screenLeft = screenLeft
         sessionObj.screenTop = screenTop
+        sessionObj.center = calcCenter()
 
         drawLines()
-
         postPosition()
         window.requestAnimationFrame(positionElem)
       }
