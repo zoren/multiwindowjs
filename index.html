@@ -13,7 +13,13 @@
   </head>
   <body>
     <canvas id="canvas" style="z-index: -1; position: absolute"></canvas>
-    <h1>Multi window BroadcastChannel demo</h1>
+    <div id="explainer">
+      <h1>Multi window BroadcastChannel demo</h1>
+      <p>
+        Open this page in multiple windows and move them around. You should see
+        lines connecting the centers of the windows.
+      </p>
+    </div>
     <script>
       // https://mdn.github.io/dom-examples/screenleft-screentop/
       const canvas = document.getElementById("canvas");
@@ -117,6 +123,7 @@
         const { sessionId } = data;
         if (data.message === "leaving") {
           sessionMap.delete(sessionId);
+          explainer.hidden = sessionMap.size > 1;
         } else {
           const sess = sessionMap.get(sessionId);
           if (sess) Object.assign(sess, data);
@@ -124,6 +131,7 @@
             // when a new session is created, we broadcast our data
             postPosition();
             sessionMap.set(sessionId, data);
+            explainer.hidden = sessionMap.size > 1;
           }
           drawLines();
         }
