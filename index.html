@@ -23,10 +23,6 @@
 
       const ctx = canvas.getContext("2d", { alpha: false });
 
-      const drawBackground = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      };
-
       const sessionList = document.getElementById("sessionList");
       const createSessionLi = (sessionId) => {
         const li = document.createElement("li");
@@ -72,18 +68,19 @@
 
       const channel = new BroadcastChannel("position-channel");
 
-      const calcCenter = ({
-        innerWidth,
-        innerHeight,
-        screenLeft,
-        screenTop,
-      }) => [
-        screenLeft + innerWidth / 2 - window.screenLeft,
-        screenTop + innerHeight / 2 - window.screenTop,
-      ];
-
       const drawLines = () => {
-        drawBackground();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.translate(-window.screenLeft, -window.screenTop);
+
+        const calcCenter = ({
+          innerWidth,
+          innerHeight,
+          screenLeft,
+          screenTop,
+        }) => [screenLeft + innerWidth / 2, screenTop + innerHeight / 2];
 
         const centers = [...sessionMap.values()].map(calcCenter);
         ctx.beginPath();
