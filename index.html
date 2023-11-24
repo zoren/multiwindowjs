@@ -21,6 +21,7 @@
       </p>
     </div>
     <script>
+      const dpr = window.devicePixelRatio
       // https://mdn.github.io/dom-examples/screenleft-screentop/
       const canvas = document.getElementById('canvas')
 
@@ -57,7 +58,6 @@
             ctx.lineTo(...centers[j])
           }
         }
-        ctx.closePath()
         ctx.strokeStyle = 'white'
         ctx.stroke()
 
@@ -72,21 +72,15 @@
       const postPosition = () =>
         setTimeout(() => channel.postMessage(sessionObj))
 
-      // Get the DPR and size of the canvas
-      const dpr = window.devicePixelRatio
       const resizeWindow = () => {
-        // Set the "actual" size of the canvas
         canvas.width = innerWidth * dpr
         canvas.height = innerHeight * dpr
 
-        // Set the "drawn" size of the canvas
         canvas.style.width = `${innerWidth}px`
         canvas.style.height = `${innerHeight}px`
 
         sessionObj.innerWidth = innerWidth
         sessionObj.innerHeight = innerHeight
-        // Scale the context to ensure correct drawing operations
-        ctx.scale(dpr, dpr)
 
         drawLines()
         postPosition()
